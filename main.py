@@ -1,7 +1,6 @@
-# Simulated sniper bot code placeholder
-print('Bot started')
+print("Bot started")
 
 import time
 while True:
     print("Bot is running...")
-    time.sleep(60) 
+    time.sleep(60)
