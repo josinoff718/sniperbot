@@ -4,7 +4,7 @@ import requests
 from solders.keypair import Keypair
 from solders.pubkey import Pubkey
 from solana.rpc.api import Client
-from solana.transaction import Transaction
+ 
 
 JUPITER_SWAP_API = "https://quote-api.jup.ag/v6/swap"
 SOLANA_RPC = "https://api.mainnet-beta.solana.com"
