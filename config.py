@@ -1,3 +1,2 @@
-# Configuration for the sniper bot
-WALLETS_TO_TRACK = []
-MAX_DAILY_SPEND = 30
+# Configuration placeholder
+DAILY_LIMIT = 30

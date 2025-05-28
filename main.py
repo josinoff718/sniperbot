@@ -1,4 +1,2 @@
-from sniper import run_bot
-
-if __name__ == "__main__":
-    run_bot()
+# Entry point for the sniper bot
+print('Sniper bot running...')
