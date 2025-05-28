@@ -1,0 +1,1 @@
+# Configuration for API keys, wallet addresses, and trading logic
