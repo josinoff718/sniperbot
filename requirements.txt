@@ -1,4 +1,4 @@
 requests
-solana
 python-dotenv
+solana
 schedule
