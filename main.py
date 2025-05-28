@@ -1,4 +1,3 @@
-# Main entry point
 from trades.sniper import run_bot
 
 if __name__ == '__main__':
