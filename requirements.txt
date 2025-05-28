@@ -1,3 +1,4 @@
 requests
 solana
-solders
+python-dotenv
+schedule
