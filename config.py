@@ -1,0 +1,1 @@
+# Configuration file with thresholds and strategy settings
