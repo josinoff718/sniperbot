@@ -1,2 +1,1 @@
-# Configuration placeholder
-DAILY_LIMIT = 30
+# Configuration settings for the bot

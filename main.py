@@ -1,5 +1,2 @@
-
-from trades.sniper import run_bot
-
-if __name__ == "__main__":
-    run_bot()
+# Main entry point for the sniper bot
+print('Bot started')
