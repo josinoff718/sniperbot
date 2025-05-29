@@ -1,3 +1,3 @@
+# Sniper Bot
 
-# Sniper Bot (Filtered + Trusted Wallets)
-This version copies two trusted wallets with no filters, and applies filters for all others.
+Live Solana trading bot with wallet copy-trading enabled.
