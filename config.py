@@ -1,1 +1,1 @@
-# Configuration settings for the bot
+# Configurations like Telegram tokens, wallet addresses, etc.

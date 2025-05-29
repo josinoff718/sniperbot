@@ -1,0 +1,1 @@
+# Auto-restart logic using watchdog or similar
