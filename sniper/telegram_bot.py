@@ -35,7 +35,6 @@ def handle_command(message_text):
             return "❌ Usage: /limit [amount]"
 
     elif message_text.startswith("/wallets"):
-        # Example static wallet list for now
         return (
             "📡 Tracked Wallets:
 "
