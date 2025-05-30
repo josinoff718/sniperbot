@@ -17,11 +17,13 @@ class SniperBot:
 
     def run(self):
         send_telegram_message(
-            f"🤖 Bot started with {len(self.wallets)} wallets. Daily Limit: {self.daily_limit} SOL/day"
+            f"🤖 Bot started. Tracking {len(self.wallets)} wallets. Daily Limit: {self.daily_limit} SOL"
         )
         while True:
             try:
                 monitor_wallets_and_trade(self.wallets, self.daily_limit, self.debug)
+                if int(time.time()) % 3600 < self.interval:
+                    summarize_daily_pnl()
             except Exception as e:
                 logging.error(f"Error in trade loop: {e}")
             time.sleep(self.interval)
