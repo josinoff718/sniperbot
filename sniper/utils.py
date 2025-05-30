@@ -109,3 +109,43 @@ def get_token_quote(token_mint, sol_amount):
 
 def get_token_price_mock(mint):
     return 1.0 + random.uniform(-0.4, 1.5)
+
+
+# Shared state for control
+paused = False
+
+def handle_telegram_commands():
+    global paused
+    try:
+        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getUpdates"
+        res = requests.get(url).json()
+        if "result" not in res:
+            return
+        for update in res["result"]:
+            msg = update.get("message", {}).get("text", "")
+            if "/pause" in msg:
+                paused = True
+                send_telegram_message("⏸ Trading paused.")
+            elif "/resume" in msg:
+                paused = False
+                send_telegram_message("▶️ Trading resumed.")
+            elif "/pnl" in msg:
+                summarize_daily_pnl()
+    except Exception as e:
+        logging.error(f"Command handling error: {e}")
+
+
+def get_sol_price_usd():
+    try:
+        res = requests.get("https://api.coingecko.com/api/v3/simple/price", params={
+            "ids": "solana",
+            "vs_currencies": "usd"
+        })
+        return res.json()["solana"]["usd"]
+    except Exception as e:
+        logging.error(f"Failed to fetch SOL price: {e}")
+        return 0
+
+def convert_usd_to_sol(usd_amount):
+    price = get_sol_price_usd()
+    return round(usd_amount / price, 4) if price else 0

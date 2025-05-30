@@ -5,23 +5,29 @@ from sniper.utils import (
     send_telegram_message,
     get_smart_wallets,
     monitor_wallets_and_trade,
-    summarize_daily_pnl
+    summarize_daily_pnl,
+    handle_telegram_commands,
+    paused,
+    convert_usd_to_sol
 )
 
 class SniperBot:
     def __init__(self):
         self.wallets = get_smart_wallets()
-        self.daily_limit = float(os.getenv("DAILY_SPEND_LIMIT", 30))
+        self.usd_cap = float(os.getenv("DAILY_USD_LIMIT", 30))
+        self.daily_limit = convert_usd_to_sol(self.usd_cap)
         self.debug = os.getenv("DEBUG", "false").lower() == "true"
         self.interval = int(os.getenv("SCAN_INTERVAL", 10))
 
     def run(self):
         send_telegram_message(
-            f"🤖 Bot started. Tracking {len(self.wallets)} wallets. Daily Limit: {self.daily_limit} SOL"
+            f"🤖 Bot started. Tracking {len(self.wallets)} wallets. Daily Limit: ${self.usd_cap} (~{self.daily_limit} SOL)"
         )
         while True:
             try:
-                monitor_wallets_and_trade(self.wallets, self.daily_limit, self.debug)
+                handle_telegram_commands()
+                if not paused:
+                    monitor_wallets_and_trade(self.wallets, self.daily_limit, self.debug)
                 if int(time.time()) % 3600 < self.interval:
                     summarize_daily_pnl()
             except Exception as e:
