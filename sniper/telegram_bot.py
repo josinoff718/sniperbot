@@ -1,7 +1,8 @@
 import telebot
 from sniper.database import get_trade_count, get_total_profit
 
-API_KEY = 'YOUR_TELEGRAM_BOT_TOKEN'
+import os
+API_KEY = os.getenv("API_KEY") 
 bot = telebot.TeleBot(API_KEY)
 
 @bot.message_handler(commands=['limit'])
