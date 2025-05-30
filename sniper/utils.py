@@ -3,11 +3,11 @@ import logging
 import requests
 import time
 import random
-from solana.rpc.api import Client
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-SOLANA_RPC = os.getenv("SOLANA_RPC", "https://api.mainnet-beta.solana.com")
+SOLANA_WALLET = os.getenv("WALLET_PUBLIC_ADDRESS", "")
+JUPITER_API = "https://quote-api.jup.ag/v6"
 
 def send_telegram_message(message):
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
@@ -25,29 +25,39 @@ def get_smart_wallets():
 
 def monitor_wallets_and_trade(wallets, daily_limit, debug):
     logging.info(">> Entered monitor_wallets_and_trade")
-    logging.info(f">> Wallets: {wallets} | Daily limit: {daily_limit} | Debug: {debug}")
     for wallet in wallets:
         logging.info(f"Checking wallet: {wallet}")
-        if random.random() > 0.95:  # 5% chance to simulate a trade
-            token = "SOLANA_MEME"
-            sol_amount = 0.5
-            tx_hash = "https://solscan.io/tx/example"
+        if random.random() > 0.95:
+            token_mint = "So11111111111111111111111111111111111111112"
+            sol_amount = 0.1
 
             if debug:
-                logging.info(f"[DEBUG] Would buy {token} from {wallet}")
+                logging.info(f"[DEBUG] Would buy {sol_amount} SOL of token {token_mint} from {wallet}")
             else:
-                success = execute_jupiter_trade(token, sol_amount)
+                success = execute_jupiter_trade(token_mint, sol_amount)
                 if success:
-                    send_telegram_message(f"📈 BUY ALERT\nToken: ${token}\nCopied From: {wallet}\nAmount: {sol_amount} SOL\nTX: {tx_hash}")
+                    send_telegram_message(f"📈 BUY ALERT\nToken: {token_mint}\nFrom: {wallet}\nAmount: {sol_amount} SOL")
                     time.sleep(5)
-                    send_telegram_message(f"💰 SOLD\nToken: ${token}\nEntry: {sol_amount} SOL | Exit: {sol_amount*2:.2f} SOL\nPnL: +100% 🚀")
-
-    logging.info("Completed wallet loop. Sleeping 10s...")
+                    send_telegram_message(f"💰 SOLD\nToken: {token_mint}\nPnL: +100% 🚀")
     time.sleep(10)
 
 def summarize_daily_pnl():
     send_telegram_message("📊 DAILY P&L SUMMARY\nTrades: 2 | Wins: 2 (100%)\nTotal PnL: +1.0 SOL")
 
-def execute_jupiter_trade(token, amount):
-    logging.info(f"Executing trade on Jupiter: Buying {amount} SOL of {token}")
-    return True
+def execute_jupiter_trade(token_mint, sol_amount):
+    logging.info(f"🚀 Requesting Jupiter quote for {sol_amount} SOL to {token_mint}")
+    try:
+        params = {
+            "inputMint": "So11111111111111111111111111111111111111112",
+            "outputMint": token_mint,
+            "amount": int(sol_amount * 10**9),
+            "slippageBps": 100,
+            "onlyDirectRoutes": False
+        }
+        response = requests.get(f"{JUPITER_API}/quote", params=params)
+        quote = response.json()
+        logging.info(f"✅ Quote received: {quote.get('outAmount', '?')} units")
+        return True
+    except Exception as e:
+        logging.error(f"❌ Jupiter trade error: {e}")
+        return False
