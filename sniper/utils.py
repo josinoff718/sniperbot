@@ -149,3 +149,28 @@ def get_sol_price_usd():
 def convert_usd_to_sol(usd_amount):
     price = get_sol_price_usd()
     return round(usd_amount / price, 4) if price else 0
+
+
+def execute_jupiter_swap(input_mint, output_mint, amount_in_lamports):
+    try:
+        swap_url = "https://quote-api.jup.ag/v6/swap"
+        payload = {
+            "userPublicKey": os.getenv("TRADER_PUBLIC_KEY"),
+            "wrapUnwrapSOL": True,
+            "feeAccount": None,
+            "inputMint": input_mint,
+            "outputMint": output_mint,
+            "amount": int(amount_in_lamports),
+            "slippageBps": 100,
+            "onlyDirectRoutes": False
+        }
+        res = requests.post(swap_url, json=payload)
+        swap_tx = res.json().get("swapTransaction", "")
+        if not swap_tx:
+            raise Exception("No transaction returned")
+        send_telegram_message("[EXEC] Swap TX prepared (not signed).")
+        return swap_tx
+    except Exception as e:
+        logging.error(f"Jupiter swap error: {e}")
+        send_telegram_message(f"[ERROR] Jupiter swap failed: {e}")
+        return None
