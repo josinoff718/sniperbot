@@ -1,9 +1,7 @@
-import threading
-from sniper.telegram_bot import telegram_command_loop, send_telegram_message
+from sniper.database import init_db
 
-send_telegram_message("✅ Bot started. Listening for commands.")
-threading.Thread(target=telegram_command_loop, daemon=True).start()
+# Initialize the database
+init_db()
 
-# Start your SniperBot or main loop here
-while True:
-    pass
+# Continue to start your bot here...
+print("✅ Database initialized. Ready to run bot.")
