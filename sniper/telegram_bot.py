@@ -24,7 +24,8 @@ def telegram_command_loop():
             c.execute("SELECT COUNT(*), SUM(profit) FROM trades")
             count, total_profit = c.fetchone()
             conn.close()
-            bot.send_message(message.chat.id, f"📊 Trades: {count}\n📈 Total PnL: {pnl:.2f} SOL\n✅ Win Rate: {win_rate:.2f}%")
+            bot.send_message(message.chat.id, f"💵 Total Profit: ${total_profit or 0:.2f}")
+ 
  
 💵 Total Profit: ${total_profit or 0:.2f}")
         except Exception as e:
