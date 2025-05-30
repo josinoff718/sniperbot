@@ -1,6 +1,6 @@
-# Entry point for the sniper bot
-from sniper_core import run_sniper
+from sniper import SniperBot
 
 if __name__ == "__main__":
-    print("Bot starting...")
-    run_sniper()
+    print("[BOT] Starting sniper bot...")
+    bot = SniperBot()
+    bot.run()
