@@ -36,7 +36,6 @@ def monitor_wallets_and_trade(wallets, daily_limit, debug):
                 send_telegram_message(f"📈 BUY ALERT\nToken: ${token}\nCopied From: {wallet}\nAmount: {sol_amount} SOL\nTX: {tx_hash}")
                 time.sleep(5)
                 send_telegram_message(f"💰 SOLD\nToken: ${token}\nEntry: {sol_amount} SOL | Exit: {sol_amount*2:.2f} SOL\nPnL: +100% 🚀")
-
     time.sleep(10)
 
 def summarize_daily_pnl():
