@@ -1,15 +1,13 @@
 import telebot
 import os
+import sqlite3
 
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-bot = telebot.TeleBot(TELEGRAM_TOKEN)
-
-def send_telegram_message(message):
-    bot.send_message(TELEGRAM_CHAT_ID, message)
-
 def telegram_command_loop():
+    bot = telebot.TeleBot(TELEGRAM_TOKEN)
+
     @bot.message_handler(commands=['wallets'])
     def handle_wallets(message):
         bot.send_message(message.chat.id, "📡 Tracked wallets go here.")
@@ -20,6 +18,19 @@ def telegram_command_loop():
 
     @bot.message_handler(commands=['report'])
     def handle_report(message):
-        bot.send_message(message.chat.id, "📊 Sample report: $0 profit today.")
+        try:
+            conn = sqlite3.connect("trades.db")
+            c = conn.cursor()
+            c.execute("SELECT COUNT(*), SUM(profit) FROM trades")
+            count, total_profit = c.fetchone()
+            conn.close()
+            bot.send_message(message.chat.id, f"📊 Trades: {count}
+💵 Total Profit: ${total_profit or 0:.2f}")
+        except Exception as e:
+            bot.send_message(message.chat.id, f"⚠️ Error generating report: {e}")
 
     return bot
+
+def send_telegram_message(text):
+    bot = telebot.TeleBot(TELEGRAM_TOKEN)
+    bot.send_message(TELEGRAM_CHAT_ID, text)
