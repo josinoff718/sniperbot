@@ -1,68 +1,48 @@
+import json
 import os
-import requests
-import logging
-import time
-from datetime import datetime
+from datetime import datetime, timedelta
+from collections import defaultdict
 
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+PERSIST_FILE = "wallet_stats.json"
 
-# Telegram
-def send_telegram_message(message):
-    try:
-        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-        payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
-        requests.post(url, json=payload)
-    except Exception as e:
-        logging.error(f"Telegram error: {e}")
+# Load wallet stats
+def load_wallet_stats():
+    if os.path.exists(PERSIST_FILE):
+        with open(PERSIST_FILE, "r") as f:
+            return json.load(f)
+    return {}
 
-# CoinGecko
-def get_sol_price_usd():
-    try:
-        res = requests.get("https://api.coingecko.com/api/v3/simple/price", params={
-            "ids": "solana",
-            "vs_currencies": "usd"
-        })
-        return res.json()["solana"]["usd"]
-    except Exception as e:
-        logging.error(f"Failed to fetch SOL price: {e}")
-        return 0
+# Save wallet stats
+def save_wallet_stats(stats):
+    with open(PERSIST_FILE, "w") as f:
+        json.dump(stats, f, indent=2)
 
-def convert_usd_to_sol(usd_amount):
-    price = get_sol_price_usd()
-    return round(usd_amount / price, 4) if price else 0
+# Update stats
+def record_trade(wallet, profit):
+    stats = load_wallet_stats()
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    if wallet not in stats:
+        stats[wallet] = {"days": {}}
+    if today not in stats[wallet]["days"]:
+        stats[wallet]["days"][today] = {"wins": 0, "losses": 0, "profit": 0}
+    if profit > 0:
+        stats[wallet]["days"][today]["wins"] += 1
+    else:
+        stats[wallet]["days"][today]["losses"] += 1
+    stats[wallet]["days"][today]["profit"] += profit
+    save_wallet_stats(stats)
 
-# Tiered Strategy
-TIER_CONFIG = {
-    'tier1': {
-        'wallets': [
-            "9Rqb3Nvru6Mjtnf8wWh9YFe5dqfeLbGXL6vCn8DdCvTg",
-            "BQ9BX1fnN2e2ByskRAybiw21MPtJLUpDY191Cgq3LyKp"
-        ],
-        'amount_usd': 12,
-        'filters': []
-    },
-    'tier2': {
-        'wallets': [
-            "7bCzMyCij95vjM73GpSgBvUPaVWfwBVoQgFjysFqivFQ",
-            "5ZsZm5pYHqvQG42HDvhoxqH6fXFKKm7AHEw9b43n9S4K",
-            "HKhy53MaayQYoB6ZEPiYPkNPLPGMTrnqQv35zQkNyXht"
-        ],
-        'amount_usd': 8,
-        'filters': ['twitter', 'volume']
-    },
-    'tier3': {
-        'wallets': [
-            "EusCkSwcwYc8vPfVq69qupxGj1wV4ThTN93onpwhk86z",
-            "5aE1AYshLkXWbVaDCnA6ToKMJdeZdXWTzskLUozuhPUU"
-        ],
-        'amount_usd': 4,
-        'filters': ['twitter', 'rugcheck', 'volume', 'age']
-    }
-}
-
-def get_wallet_tier(wallet_address):
-    for tier, config in TIER_CONFIG.items():
-        if wallet_address in config['wallets']:
-            return tier, config
-    return 'unknown', {'amount_usd': 0, 'filters': []}
+# Generate daily report
+def generate_daily_report():
+    stats = load_wallet_stats()
+    report_lines = ["📊 Daily Wallet PnL Report"]
+    for wallet, data in stats.items():
+        total_wins, total_losses, total_profit = 0, 0, 0
+        for day in data["days"]:
+            total_wins += data["days"][day]["wins"]
+            total_losses += data["days"][day]["losses"]
+            total_profit += data["days"][day]["profit"]
+        total_trades = total_wins + total_losses
+        win_rate = (total_wins / total_trades) * 100 if total_trades else 0
+        report_lines.append(f"{wallet[:6]}... → Win rate: {win_rate:.1f}%, PnL: {total_profit:.2f} SOL")
+    return "\n".join(report_lines)
