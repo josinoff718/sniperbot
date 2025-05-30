@@ -35,15 +35,7 @@ def handle_command(message_text):
             return "❌ Usage: /limit [amount]"
 
     elif message_text.startswith("/wallets"):
-        return (
-            "📡 Tracked Wallets:
-"
-            "- Tier 1: 9Rqb3N..., BQ9BX1...
-"
-            "- Tier 2: 7bCzMy..., 5ZsZm5...
-"
-            "- Tier 3: EusCkS..., 5aE1AY..."
-        )
+        return "📡 Tracked Wallets:\n- Tier 1: 9Rqb3N..., BQ9BX1...\n- Tier 2: 7bCzMy..., 5ZsZm5...\n- Tier 3: EusCkS..., 5aE1AY..."
 
     elif message_text.startswith("/report"):
         from sniper.utils import generate_daily_report
