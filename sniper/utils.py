@@ -1,63 +1,85 @@
 import os
-import logging
-import requests
 import time
+import logging
 import random
+import requests
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-SOLANA_WALLET = os.getenv("WALLET_PUBLIC_ADDRESS", "")
 JUPITER_API = "https://quote-api.jup.ag/v6"
+positions = {}
 
-def send_telegram_message(message):
-    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
-        print("Telegram credentials not set.")
-        return
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    data = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
-    try:
-        requests.post(url, data=data)
-    except Exception as e:
-        logging.error(f"Telegram error: {e}")
+class TradeTracker:
+    def __init__(self, mint, entry_price, sol_amount):
+        self.mint = mint
+        self.entry = entry_price
+        self.amount = sol_amount
+        self.peak = entry_price
+        self.open = True
+
+    def update_price(self, current_price):
+        if current_price > self.peak:
+            self.peak = current_price
+        gain = (current_price - self.entry) / self.entry
+        drop = (self.peak - current_price) / self.peak
+        if gain >= 1.0: return 'take_profit'
+        if drop >= 0.3: return 'trailing_stop'
+        if gain <= -0.4: return 'stop_loss'
+        return 'hold'
+
+def send_telegram_message(msg):
+    if TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
+        try:
+            requests.post(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
+                          data={"chat_id": TELEGRAM_CHAT_ID, "text": msg})
+        except Exception as e:
+            logging.error(f"Telegram error: {e}")
 
 def get_smart_wallets():
     return os.getenv("SMART_WALLETS", "").split(",")
 
 def monitor_wallets_and_trade(wallets, daily_limit, debug):
-    logging.info(">> Entered monitor_wallets_and_trade")
     for wallet in wallets:
-        logging.info(f"Checking wallet: {wallet}")
         if random.random() > 0.95:
             token_mint = "So11111111111111111111111111111111111111112"
             sol_amount = 0.1
+            quote = get_token_quote(token_mint, sol_amount)
+            if not quote:
+                continue
+            entry_price = float(quote.get("outAmount", 0)) / 10**6
+            positions[token_mint] = TradeTracker(token_mint, entry_price, sol_amount)
+            send_telegram_message(f"📈 BUY: {sol_amount} SOL → {token_mint} @ {entry_price}")
+            time.sleep(5)
 
-            if debug:
-                logging.info(f"[DEBUG] Would buy {sol_amount} SOL of token {token_mint} from {wallet}")
-            else:
-                success = execute_jupiter_trade(token_mint, sol_amount)
-                if success:
-                    send_telegram_message(f"📈 BUY ALERT\nToken: {token_mint}\nFrom: {wallet}\nAmount: {sol_amount} SOL")
-                    time.sleep(5)
-                    send_telegram_message(f"💰 SOLD\nToken: {token_mint}\nPnL: +100% 🚀")
-    time.sleep(10)
+    for mint, tracker in positions.items():
+        if not tracker.open:
+            continue
+        price = get_token_price_mock(mint)
+        decision = tracker.update_price(price)
+        if decision != 'hold':
+            send_telegram_message(f"💰 SELL: {mint} - {decision.upper()} @ {price} (Entry: {tracker.entry})")
+            tracker.open = False
 
-def summarize_daily_pnl():
-    send_telegram_message("📊 DAILY P&L SUMMARY\nTrades: 2 | Wins: 2 (100%)\nTotal PnL: +1.0 SOL")
-
-def execute_jupiter_trade(token_mint, sol_amount):
-    logging.info(f"🚀 Requesting Jupiter quote for {sol_amount} SOL to {token_mint}")
+def get_token_quote(token_mint, sol_amount):
     try:
         params = {
             "inputMint": "So11111111111111111111111111111111111111112",
             "outputMint": token_mint,
             "amount": int(sol_amount * 10**9),
-            "slippageBps": 100,
-            "onlyDirectRoutes": False
+            "slippageBps": 100
         }
-        response = requests.get(f"{JUPITER_API}/quote", params=params)
-        quote = response.json()
-        logging.info(f"✅ Quote received: {quote.get('outAmount', '?')} units")
-        return True
+        res = requests.get(f"{JUPITER_API}/quote", params=params)
+        return res.json()
     except Exception as e:
-        logging.error(f"❌ Jupiter trade error: {e}")
-        return False
+        logging.error(f"Quote error: {e}")
+        return None
+
+def get_token_price_mock(mint):
+    # Simulate price oscillation
+    base = 1.0
+    return base + random.uniform(-0.5, 1.5)
+
+def summarize_daily_pnl():
+    wins = sum(1 for t in positions.values() if not t.open and t.peak >= t.entry * 2)
+    total = len(positions)
+    send_telegram_message(f"📊 Daily Summary: Trades: {total}, Wins: {wins}, Win Rate: {100 * wins/total:.0f}%")

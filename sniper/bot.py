@@ -17,7 +17,7 @@ class SniperBot:
 
     def run(self):
         send_telegram_message(
-            f"🤖 Bot successfully started!\nLive trading active.\nTracking: {len(self.wallets)} trusted wallets\nDaily Limit: {self.daily_limit} SOL/day"
+            f"🤖 Bot started with {len(self.wallets)} wallets. Daily Limit: {self.daily_limit} SOL/day"
         )
         while True:
             try:
