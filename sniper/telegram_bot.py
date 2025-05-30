@@ -1,38 +1,23 @@
 import telebot
-import os
-import sqlite3
+from sniper.database import get_trade_count, get_total_profit
 
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+API_KEY = 'YOUR_TELEGRAM_BOT_TOKEN'
+bot = telebot.TeleBot(API_KEY)
+
+@bot.message_handler(commands=['limit'])
+def handle_limit(message):
+    bot.send_message(message.chat.id, "Daily limit is $30")
+
+@bot.message_handler(commands=['report'])
+def handle_report(message):
+    try:
+        count = get_trade_count()
+        total_profit = get_total_profit()
+        bot.send_message(message.chat.id, f"📊 Trades: {count}")
+        bot.send_message(message.chat.id, f"💵 Total Profit: ${total_profit or 0:.2f}")
+    except Exception as e:
+        bot.send_message(message.chat.id, f"⚠️ Error generating report: {str(e)}")
 
 def telegram_command_loop():
-    bot = telebot.TeleBot(TELEGRAM_TOKEN)
-
-    @bot.message_handler(commands=['wallets'])
-    def handle_wallets(message):
-        bot.send_message(message.chat.id, "📡 Tracked wallets go here.")
-
-    @bot.message_handler(commands=['limit'])
-    def handle_limit(message):
-        bot.send_message(message.chat.id, "💰 Daily Limit: $30 USD")
-
-    @bot.message_handler(commands=['report'])
-    def handle_report(message):
-        try:
-            conn = sqlite3.connect("trades.db")
-            c = conn.cursor()
-            c.execute("SELECT COUNT(*), SUM(profit) FROM trades")
-            count, total_profit = c.fetchone()
-            conn.close()
-            bot.send_message(message.chat.id, f"💵 Total Profit: ${total_profit or 0:.2f}")
- 
- 
-💵 Total Profit: ${total_profit or 0:.2f}")
-        except Exception as e:
-            bot.send_message(message.chat.id, f"⚠️ Error generating report: {e}")
-
-    return bot
-
-def send_telegram_message(text):
-    bot = telebot.TeleBot(TELEGRAM_TOKEN)
-    bot.send_message(TELEGRAM_CHAT_ID, text)
+    print("Bot started listening for commands...")
+    bot.polling()

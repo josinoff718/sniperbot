@@ -6,12 +6,24 @@ def init_db():
     c.execute('''
         CREATE TABLE IF NOT EXISTS trades (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            token TEXT,
-            buy_price REAL,
-            sell_price REAL,
-            profit REAL,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            profit REAL
         )
     ''')
     conn.commit()
     conn.close()
+
+def get_trade_count():
+    conn = sqlite3.connect("trades.db")
+    c = conn.cursor()
+    c.execute("SELECT COUNT(*) FROM trades")
+    count = c.fetchone()[0]
+    conn.close()
+    return count
+
+def get_total_profit():
+    conn = sqlite3.connect("trades.db")
+    c = conn.cursor()
+    c.execute("SELECT SUM(profit) FROM trades")
+    total = c.fetchone()[0]
+    conn.close()
+    return total
