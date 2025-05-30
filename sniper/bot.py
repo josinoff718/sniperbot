@@ -1,1 +1,2 @@
-from sniper.telegram_bot import send_telegram_message
+from sniper.telegram_bot import telegram_command_loop
+ 
