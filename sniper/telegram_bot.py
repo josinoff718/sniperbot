@@ -76,20 +76,37 @@ def telegram_command_loop():
 
     @bot.message_handler(commands=['wallets'])
     def handle_wallets(message):
-        bot.send_message(message.chat.id, "📡 Tracked Wallets:\n- Tier 1: 9Rqb3N..., BQ9BX1...\n- Tier 2: 7bCzMy..., 5ZsZm5...\n- Tier 3: EusCkS..., 5aE1AY...")
+        try:
+            tracked_wallets = get_tracked_wallets()
+            text = "📡 Tracked Wallets:\n\n"
+            for wallet in tracked_wallets:
+                label = wallet.get("label", "No Label")
+                address = wallet.get("address")
+                tier = wallet.get("tier", "Unknown")
+                text += f"• {label} ({tier})\n{address}\n\n"
+            bot.send_message(message.chat.id, text.strip())
+        except Exception as e:
+            bot.send_message(message.chat.id, f"⚠️ Error fetching wallets: {str(e)}")
 
     @bot.message_handler(commands=['limit'])
     def handle_limit(message):
-        limit = load_daily_limit()
-        bot.send_message(message.chat.id, f"💰 Daily Limit: ${limit} USD")
+        try:
+            limit = load_daily_limit()
+            bot.send_message(message.chat.id, f"💰 Daily Limit: ${limit} USD")
+        except Exception as e:
+            bot.send_message(message.chat.id, f"⚠️ Error fetching limit: {str(e)}")
 
     @bot.message_handler(commands=['report'])
     def handle_report(message):
-    try:
-        report = get_daily_report()
-        bot.send_message(message.chat.id, report)
-    except Exception as e:
-        bot.send_message(message.chat.id, f"⚠️ Error in /report: {str(e)}")
+        try:
+            report = get_daily_report()
+            bot.send_message(message.chat.id, report)
+        except Exception as e:
+            bot.send_message(message.chat.id, f"⚠️ Error generating report: {str(e)}")
+
+    bot.send_message(TELEGRAM_CHAT_ID, "🤖 Bot started listening for commands...")
+    bot.infinity_polling()
+ 
  
 
     print("✅ Telegram command listener started.")
