@@ -24,7 +24,10 @@ def get_smart_wallets():
     return os.getenv("SMART_WALLETS", "").split(",")
 
 def monitor_wallets_and_trade(wallets, daily_limit, debug):
+    logging.info(">> Entered monitor_wallets_and_trade")
+    logging.info(f">> Wallets: {wallets} | Daily limit: {daily_limit} | Debug: {debug}")
     for wallet in wallets:
+        logging.info(f"Checking wallet: {wallet}")
         if random.random() > 0.95:  # 5% chance to simulate a trade
             token = "SOLANA_MEME"
             sol_amount = 0.5
@@ -39,6 +42,7 @@ def monitor_wallets_and_trade(wallets, daily_limit, debug):
                     time.sleep(5)
                     send_telegram_message(f"💰 SOLD\nToken: ${token}\nEntry: {sol_amount} SOL | Exit: {sol_amount*2:.2f} SOL\nPnL: +100% 🚀")
 
+    logging.info("Completed wallet loop. Sleeping 10s...")
     time.sleep(10)
 
 def summarize_daily_pnl():
