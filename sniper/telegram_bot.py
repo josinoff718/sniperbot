@@ -88,6 +88,26 @@ def telegram_command_loop():
         report = get_daily_report()
         bot.send_message(message.chat.id, report)
 
+    print("✅ Telegram command listener started.")
+
+    # ✅ This line starts polling in a thread-safe way
+    bot.infinity_polling()
+ 
+
+    @bot.message_handler(commands=['wallets'])
+    def handle_wallets(message):
+        bot.send_message(message.chat.id, "📡 Tracked Wallets:\n- Tier 1: 9Rqb3N..., BQ9BX1...\n- Tier 2: 7bCzMy..., 5ZsZm5...\n- Tier 3: EusCkS..., 5aE1AY...")
+
+    @bot.message_handler(commands=['limit'])
+    def handle_limit(message):
+        limit = load_daily_limit()
+        bot.send_message(message.chat.id, f"💰 Daily Limit: ${limit} USD")
+
+    @bot.message_handler(commands=['report'])
+    def handle_report(message):
+        report = get_daily_report()
+        bot.send_message(message.chat.id, report)
+
     while True:
         try:
             bot.polling()
