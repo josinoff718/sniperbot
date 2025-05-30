@@ -1,5 +1,5 @@
 from sniper.database import init_db
-from sniper.telegram_bot import telegram_command_loop, send_telegram_message
+from sniper.telegram_bot import telegram_command_loop 
 
 # Step 1: Initialize the database
 init_db()
