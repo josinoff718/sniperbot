@@ -1,10 +1,9 @@
-import logging
-from sniper import SniperBot
+import threading
+from sniper.telegram_bot import telegram_command_loop, send_telegram_message
 
-logging.basicConfig(level=logging.INFO)
-logging.info(">>> MAIN.PY STARTED <<<")
+send_telegram_message("✅ Bot started. Listening for commands.")
+threading.Thread(target=telegram_command_loop, daemon=True).start()
 
-if __name__ == "__main__":
-    logging.info("Initializing SniperBot...")
-    bot = SniperBot()
-    bot.run()
+# Start your SniperBot or main loop here
+while True:
+    pass

@@ -1,6 +1,8 @@
 import os
 import requests
 import json
+import time
+import telebot
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
@@ -24,21 +26,25 @@ def load_daily_limit():
             return json.load(f).get("usd_limit", 30)
     return 30
 
-def handle_command(message_text):
-    if message_text.startswith("/limit"):
+def telegram_command_loop():
+    bot = telebot.TeleBot(TELEGRAM_TOKEN)
+
+    @bot.message_handler(commands=['wallets'])
+    def handle_wallets(message):
+        bot.send_message(message.chat.id, "📡 Tracked Wallets:\n- Tier 1: 9Rqb3N..., BQ9BX1...\n- Tier 2: 7bCzMy..., 5ZsZm5...\n- Tier 3: EusCkS..., 5aE1AY...")
+
+    @bot.message_handler(commands=['limit'])
+    def handle_limit(message):
+        limit = load_daily_limit()
+        bot.send_message(message.chat.id, f"💰 Daily Limit: ${limit} USD")
+
+    @bot.message_handler(commands=['report'])
+    def handle_report(message):
+        bot.send_message(message.chat.id, "📊 PnL report placeholder.")  # Replace with actual logic
+
+    while True:
         try:
-            _, amount = message_text.split()
-            value = int(amount)
-            save_daily_limit(value)
-            return f"✅ Daily USD limit updated to ${value}"
-        except:
-            return "❌ Usage: /limit [amount]"
-
-    elif message_text.startswith("/wallets"):
-        return "📡 Tracked Wallets:\n- Tier 1: 9Rqb3N..., BQ9BX1...\n- Tier 2: 7bCzMy..., 5ZsZm5...\n- Tier 3: EusCkS..., 5aE1AY..."
-
-    elif message_text.startswith("/report"):
-        from sniper.utils import generate_daily_report
-        return generate_daily_report()
-
-    return "🤖 Unknown command. Try /limit, /wallets, or /report"
+            bot.polling()
+        except Exception as e:
+            print(f"Telegram polling error: {e}")
+            time.sleep(5)
