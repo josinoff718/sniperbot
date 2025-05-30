@@ -1,6 +1,7 @@
+import logging
 from sniper import SniperBot
 
 if __name__ == "__main__":
-    print("Bot starting...")
+    logging.info("Bot successfully started!")
     bot = SniperBot()
     bot.run()
