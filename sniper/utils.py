@@ -2,6 +2,7 @@ import os
 import logging
 import requests
 import time
+import random
 from solana.rpc.api import Client
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
@@ -24,18 +25,20 @@ def get_smart_wallets():
 
 def monitor_wallets_and_trade(wallets, daily_limit, debug):
     for wallet in wallets:
-        token = "SOLANA_MEME"
-        sol_amount = 0.5
-        tx_hash = "https://solscan.io/tx/example"
+        if random.random() > 0.95:  # 5% chance to simulate a trade
+            token = "SOLANA_MEME"
+            sol_amount = 0.5
+            tx_hash = "https://solscan.io/tx/example"
 
-        if debug:
-            logging.info(f"[DEBUG] Would buy {token} from {wallet}")
-        else:
-            success = execute_jupiter_trade(token, sol_amount)
-            if success:
-                send_telegram_message(f"📈 BUY ALERT\nToken: ${token}\nCopied From: {wallet}\nAmount: {sol_amount} SOL\nTX: {tx_hash}")
-                time.sleep(5)
-                send_telegram_message(f"💰 SOLD\nToken: ${token}\nEntry: {sol_amount} SOL | Exit: {sol_amount*2:.2f} SOL\nPnL: +100% 🚀")
+            if debug:
+                logging.info(f"[DEBUG] Would buy {token} from {wallet}")
+            else:
+                success = execute_jupiter_trade(token, sol_amount)
+                if success:
+                    send_telegram_message(f"📈 BUY ALERT\nToken: ${token}\nCopied From: {wallet}\nAmount: {sol_amount} SOL\nTX: {tx_hash}")
+                    time.sleep(5)
+                    send_telegram_message(f"💰 SOLD\nToken: ${token}\nEntry: {sol_amount} SOL | Exit: {sol_amount*2:.2f} SOL\nPnL: +100% 🚀")
+
     time.sleep(10)
 
 def summarize_daily_pnl():
