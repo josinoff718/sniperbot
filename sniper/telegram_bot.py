@@ -84,9 +84,13 @@ def telegram_command_loop():
         bot.send_message(message.chat.id, f"💰 Daily Limit: ${limit} USD")
 
     @bot.message_handler(commands=['report'])
-    def handle_report(message):
+def handle_report(message):
+    try:
         report = get_daily_report()
         bot.send_message(message.chat.id, report)
+    except Exception as e:
+        bot.send_message(message.chat.id, f"⚠️ Error in /report: {str(e)}")
+ 
 
     print("✅ Telegram command listener started.")
 
