@@ -1,5 +1,5 @@
 DEBUG = True
-TELEGRAM_CHAT_ID = "your_chat_id_here"
+TELEGRAM_CHAT_ID = "6471507153"
 TELEGRAM_TOKEN   = "your_bot_token_here"
 SIMULATION_MODE  = True
 
