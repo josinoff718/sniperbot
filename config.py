@@ -1,6 +1,6 @@
 DEBUG = True
 TELEGRAM_CHAT_ID = "6471507153"
-TELEGRAM_TOKEN   = "your_bot_token_here"
+TELEGRAM_TOKEN   = "7514773717:AAH_y9BJXkTSqaFgbQOLDx1m9b3hUEUQU9Q"
 SIMULATION_MODE  = True
 
 # ── Tier 1: No-filter wallets (your two always-track addresses) ──
