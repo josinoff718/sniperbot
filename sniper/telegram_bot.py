@@ -1,39 +1,48 @@
-import os
+import logging
 import telebot
-from sniper.database import get_trade_count, get_total_profit, get_tracked_wallets
+from config import TIER1_WALLETS, TIER2_WALLETS, TIER3_WALLETS, TELEGRAM_TOKEN
 
-API_KEY = os.getenv("API_KEY")
-bot = telebot.TeleBot(API_KEY)
+# Initialize bot with Telegram token
+bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
-@bot.message_handler(commands=['limit'])
-def handle_limit(message):
-    bot.send_message(message.chat.id, "Daily limit is $30")
+# Configure logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s [%(levelname)s] %(message)s')
+logging.debug(f"Tier 1 wallets (no filters): {TIER1_WALLETS}")
+logging.debug(f"Tier 2 wallets (basic filters): {TIER2_WALLETS}")
+logging.debug(f"Tier 3 wallets (full filters): {TIER3_WALLETS}")
 
-@bot.message_handler(commands=['report'])
-def handle_report(message):
-    try:
-        count = get_trade_count()
-        total_profit = get_total_profit()
-        bot.send_message(message.chat.id, f"📊 Trades: {count}")
-        bot.send_message(message.chat.id, f"💵 Total Profit: ${total_profit or 0:.2f}")
-    except Exception as e:
-        bot.send_message(message.chat.id, f"⚠️ Error generating report: {str(e)}")
+@bot.message_handler(commands=["wallets"])
+def show_wallets(message):
+    """
+    Send a Telegram message listing wallets by tier.
+    """
+    text_lines = []
 
-@bot.message_handler(commands=['wallets'])
-def handle_wallets(message):
-    try:
-        wallets = get_tracked_wallets()
-        if wallets:
-            reply = "\n".join(wallets)
-        else:
-            reply = "No wallets are currently being tracked."
-        bot.send_message(message.chat.id, reply)
-    except Exception as e:
-        bot.send_message(message.chat.id, f"⚠️ Error fetching wallets: {str(e)}")
+    # Tier 1
+    text_lines.append("🏅 *Tier 1 (No Filters)*")
+    if TIER1_WALLETS:
+        for w in TIER1_WALLETS:
+            text_lines.append(f"• {w}")
+    else:
+        text_lines.append("  (none)")
 
-def send_telegram_message(text):
-    bot.send_message(os.getenv("OWNER_CHAT_ID"), text)
+    # Tier 2
+    text_lines.append("\n🐳 *Tier 2 (Basic Filters)*")
+    if TIER2_WALLETS:
+        for w in TIER2_WALLETS:
+            text_lines.append(f"• {w}")
+    else:
+        text_lines.append("  (none)")
 
-def telegram_command_loop():
-    print("🤖 Bot started listening for commands...")
-    bot.polling(none_stop=True, interval=1, timeout=20)
+    # Tier 3
+    text_lines.append("\n🔍 *Tier 3 (Full Filters)*")
+    if TIER3_WALLETS:
+        for w in TIER3_WALLETS:
+            text_lines.append(f"• {w}")
+    else:
+        text_lines.append("  (none)")
+
+    final_text = "\n".join(text_lines)
+    bot.send_message(message.chat.id, final_text, parse_mode="Markdown")
+
+# (Keep your existing handlers and bot.polling() or equivalent below)
