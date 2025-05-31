@@ -27,3 +27,13 @@ def get_total_profit():
     total = c.fetchone()[0]
     conn.close()
     return total
+
+def get_tracked_wallets():
+    import sqlite3
+    conn = sqlite3.connect("sniper.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT wallet_address FROM wallets")
+    rows = cursor.fetchall()
+    conn.close()
+    return [row[0] for row in rows]
+
