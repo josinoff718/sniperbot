@@ -25,4 +25,4 @@ def handle_wallets(message):
 
 def telegram_command_loop():
     print("🤖 Bot started listening for commands...")
-    bot.polling(none_stop=True, interval=1, timeout=20) 
+    bot.polling(none_stop=True, interval=1, timeout=20)  
