@@ -1,1 +1,1 @@
-# Configurations like Telegram tokens, wallet addresses, etc.
+# Placeholder for config.py

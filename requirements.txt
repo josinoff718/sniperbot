@@ -1,2 +1,1 @@
-requests
-pyTelegramBotAPI
+# Placeholder for requirements.txt

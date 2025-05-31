@@ -1,3 +1,1 @@
-# Sniper Bot
-
-Live Solana trading bot with wallet copy-trading enabled.
+# Placeholder for README.md

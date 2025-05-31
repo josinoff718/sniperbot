@@ -1,2 +1,1 @@
-#!/bin/bash
-python3 main.py
+# Placeholder for start.sh

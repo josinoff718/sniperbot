@@ -1,1 +1,1 @@
-# Auto-restart logic using watchdog or similar
+# Placeholder for restart_watchdog.py
