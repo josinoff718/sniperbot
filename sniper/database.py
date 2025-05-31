@@ -1,12 +1,35 @@
 import sqlite3
 
-def init_db():
-    conn = sqlite3.connect("trades.db")
-    c = conn.cursor()
-    c.execute('''
+ def init_db():
+    conn = sqlite3.connect("sniper.db")
+    cursor = conn.cursor()
+
+    # Trades table
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS trades (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            profit REAL
+            wallet TEXT,
+            token TEXT,
+            amount REAL,
+            buy_price REAL,
+            sell_price REAL,
+            profit REAL,
+            timestamp TEXT
+        )
+    """)
+
+    # Tracked wallets table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS tracked_wallets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            wallet_address TEXT NOT NULL,
+            tier TEXT DEFAULT 'tier3'
+        )
+    """)
+
+    conn.commit()
+    conn.close()
+
         )
     ''')
     conn.commit()
