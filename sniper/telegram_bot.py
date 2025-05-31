@@ -45,4 +45,4 @@ def show_wallets(message):
     final_text = "\n".join(text_lines)
     bot.send_message(message.chat.id, final_text, parse_mode="Markdown")
 
-# (Keep your existing handlers and bot.polling() or equivalent below)
+# (Keep your existing handlers here if any)
