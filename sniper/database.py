@@ -37,3 +37,12 @@ def get_tracked_wallets():
     conn.close()
     return [row[0] for row in rows]
 
+import sqlite3
+
+def get_tracked_wallets():
+    conn = sqlite3.connect("sniper.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT wallet_address FROM tracked_wallets")
+    rows = cursor.fetchall()
+    conn.close()
+    return [row[0] for row in rows]
