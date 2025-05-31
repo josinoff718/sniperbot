@@ -1,13 +1,13 @@
-import os
 import telebot
-from sniper.database import get_trade_count, get_total_profit
+import os
+from sniper.database import get_trade_count, get_total_profit, get_tracked_wallets
 
 API_KEY = os.getenv("API_KEY")
 bot = telebot.TeleBot(API_KEY)
 
 @bot.message_handler(commands=['limit'])
 def handle_limit(message):
-    bot.send_message(message.chat.id, "💰 Daily Limit: $30 USD")
+    bot.send_message(message.chat.id, "💰 Daily limit is $30")
 
 @bot.message_handler(commands=['report'])
 def handle_report(message):
@@ -21,8 +21,16 @@ def handle_report(message):
 
 @bot.message_handler(commands=['wallets'])
 def handle_wallets(message):
-    bot.send_message(message.chat.id, "📡 Tracked wallets go here.")
+    try:
+        wallets = get_tracked_wallets()
+        wallet_text = '\n'.join(wallets) if wallets else "No wallets are currently being tracked."
+        bot.send_message(message.chat.id, f"👛 Tracked Wallets:\n{wallet_text}")
+    except Exception as e:
+        bot.send_message(message.chat.id, f"⚠️ Error fetching wallets: {str(e)}")
 
 def telegram_command_loop():
     print("🤖 Bot started listening for commands...")
-    bot.polling(none_stop=True, interval=1, timeout=20)  
+    bot.polling(none_stop=True, interval=1, timeout=20)
+
+def send_telegram_message(text):
+    bot.send_message(chat_id=os.getenv("TELEGRAM_CHAT_ID"), text=text)
