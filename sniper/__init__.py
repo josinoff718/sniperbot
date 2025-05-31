@@ -1,1 +1,1 @@
-# No imports needed here
+from .bot import SniperBot

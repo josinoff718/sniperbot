@@ -1,3 +1,3 @@
 class SniperBot:
     def run(self):
-        print("🔫 SniperBot logic starts running... (live trading logic here)")
+        print("🚀 SniperBot is live. Trading...")

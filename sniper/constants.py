@@ -1,0 +1,4 @@
+SMART_WALLETS_TO_ALWAYS_COPY = [
+    "9Rqb3Nvru6Mjtnf8wWh9YFe5dqfeLbGXL6vCn8DdCvTg",
+    "BQ9BX1fnN2e2ByskRAybiw21MPtJLUpDY191Cgq3LyKp"
+]
